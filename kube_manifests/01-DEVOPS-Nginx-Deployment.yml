@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: eks-devops
-          image: CONTAINER_IMAGE
+          image: 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya:latest
           ports:
             - containerPort: 80
