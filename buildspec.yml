@@ -43,7 +43,7 @@ phases:
       - aws eks update-kubeconfig --name eks
       # Apply changes to our Application using kubectl
       - echo "Apply changes to kube manifests"            
-      - kubectl apply -f hello-k8s
+      - kubectl apply -f hello-k8s.yml
       - echo "Completed applying changes to Kubernetes Objects"           
       # Create Artifacts which we can use if we want to continue our pipeline for other stages
       - printf '[{"name":"hello-k8s","imageUri":"%s"}]' 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya:$TAG > build.json
