@@ -9,7 +9,7 @@ phases:
         - TAG="$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
         # Update Image tag in our Kubernetes Deployment Manifest        
         - echo "Update Image tag in kube-manifest..."
-        - sed -i 's@CONTAINER_IMAGE@'"031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya:latest"'@' kube_manifests/01-DEVOPS-Nginx-Deployment.yml
+        - sed -i 's@CONTAINER_IMAGE@'"$TAG"'@' hello-k8s.yml
         # Verify AWS CLI Version        
         - echo "Verify AWS CLI Version..."
         - aws --version
@@ -23,14 +23,13 @@ phases:
       # Build Docker Image
       - echo "Build started on `date`"
       - echo "Building the Docker image..."
-      - docker build -t  web:1 .
-      - docker tag web:1 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya
+      - docker build --tag 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya:$TAG .
   post_build:
     commands:
       # Push Docker Image to ECR Repository
       - echo "Build completed on `date`"
       - echo "Pushing the Docker image to ECR Repository"
-      - docker push 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya
+      - docker push 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya:$TAG
       - echo "Docker Image Push to ECR Completed -  $REPOSITORY_URI:v1"    
       # Extracting AWS Credential Information using STS Assume Role for kubectl
       - echo "Setting Environment Variables related to AWS CLI for Kube Config Setup"          
@@ -44,10 +43,10 @@ phases:
       - aws eks update-kubeconfig --name eks
       # Apply changes to our Application using kubectl
       - echo "Apply changes to kube manifests"            
-      - kubectl apply -f kube_manifests/
+      - kubectl apply -f hello-k8s
       - echo "Completed applying changes to Kubernetes Objects"           
       # Create Artifacts which we can use if we want to continue our pipeline for other stages
-      - printf '[{"name":"01-DEVOPS-Nginx-Deployment.yml","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
+      - printf '[{"name":"hello-k8s","imageUri":"%s"}]' 031409194969.dkr.ecr.us-east-1.amazonaws.com/kamya:$TAG > build.json
       # Additional Commands to view your credentials      
       #- echo "Credentials Value is..  ${CREDENTIALS}"      
       #- echo "AWS_ACCESS_KEY_ID...  ${AWS_ACCESS_KEY_ID}"            
